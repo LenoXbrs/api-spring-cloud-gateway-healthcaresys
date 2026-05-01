@@ -1,0 +1,29 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: rota-pacientes
+              uri: http://api-pacientes:8081
+              predicates:
+                - Path=/pacientes/**
+
+            - id: rota-usuarios
+              uri: http://api-usuarios:8082
+              predicates:
+                - Path=/usuarios/**
+
+            - id: rota-triagem
+              uri: http://api-triagem:8083
+              predicates:
+                - Path=/triagem/**
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+
