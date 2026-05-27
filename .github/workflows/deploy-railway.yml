@@ -1,0 +1,22 @@
+# Deploy automático no Railway após merge na main.
+# Secrets necessários no GitHub (Settings → Secrets → Actions):
+#   RAILWAY_TOKEN  — Account Settings → Tokens no Railway
+#   RAILWAY_SERVICE_ID — Service → Settings → Service ID (gateway)
+
+name: Deploy Railway
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Railway
+        uses: berviantoleo/railway-deploy-action@v1.2.3
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: ${{ secrets.RAILWAY_SERVICE_ID }}
