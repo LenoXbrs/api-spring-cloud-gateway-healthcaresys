@@ -1,0 +1,37 @@
+# Deploy no Kubernetes (requer KUBECONFIG no GitHub Secrets).
+# Imagens devem existir no GHCR — rode publish-image.yml nos 4 repositórios antes.
+# Edite k8s/overlays/ghcr/kustomization.yaml com seu usuário GitHub.
+
+name: Deploy Kubernetes
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/deploy-kubernetes.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" | base64 -d > ~/.kube/config
+        if: ${{ secrets.KUBECONFIG != '' }}
+
+      - name: Deploy with Kustomize
+        run: kubectl apply -k k8s/overlays/ghcr
+
+      - name: Wait for gateway
+        run: |
+          kubectl rollout status deployment/gateway -n healthcare --timeout=300s
+          kubectl get pods -n healthcare
+          kubectl get svc -n healthcare
